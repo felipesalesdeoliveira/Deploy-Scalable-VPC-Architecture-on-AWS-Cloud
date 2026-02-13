@@ -1,4 +1,4 @@
-# 🌐 Deploy de Arquitetura VPC Escalável na AWS
+# 🌐 Deploy de Arquitetura VPC Escalável na AWS com Terraform
 
 ![AWS-Cloud](https://imgur.com/AXD50yl.png)
 
