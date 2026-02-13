@@ -4,11 +4,11 @@
 
 ## 📌 Sobre o Projeto
 
-Este projeto demonstra a implementação de uma arquitetura de rede modular, escalável e altamente disponível utilizando Amazon VPC.
+Este projeto demonstra a implementação de uma arquitetura de rede modular, escalável e altamente disponível na AWS utilizando **Terraform** para provisionamento automatizado.
 
-A solução foi projetada para simular um ambiente corporativo real, com separação entre camadas administrativas e aplicação, conectividade privada entre VPCs, controle de tráfego e observabilidade completa via Flow Logs.
+A solução simula um ambiente corporativo real, com separação entre camadas administrativas e de aplicação, conectividade privada entre VPCs, controle de tráfego, observabilidade via Flow Logs e escalabilidade automatizada.
 
-O objetivo principal é construir uma base de infraestrutura preparada para workloads escaláveis e ambientes seguros em produção.
+O objetivo é construir uma base de infraestrutura preparada para **workloads seguros e escaláveis em produção**.
 
 ---
 
@@ -65,12 +65,13 @@ A arquitetura é composta por duas VPCs separadas:
 - Apache Web Server
 - AWS CLI
 - AWS Systems Manager (SSM)
+- Terraform >= 1.0
 
 ---
 
 # 🔄 Pré-Deploy (Golden AMI)
 
-Foi criada uma Golden AMI contendo:
+Foi criada uma **Golden AMI** contendo:
 
 - AWS CLI configurado
 - Apache Web Server instalado
@@ -79,41 +80,95 @@ Foi criada uma Golden AMI contendo:
 - Script para envio de métricas customizadas de memória
 - AWS SSM Agent
 
-Essa abordagem reduz tempo de provisionamento e garante padronização das instâncias.
+Esta abordagem reduz tempo de provisionamento e garante padronização das instâncias.
 
 ---
 
-# 🚀 Provisionamento da Infraestrutura
+# 📂 Estrutura de Pastas Recomendada
 
-## 1️⃣ Construção das VPCs
+```
+terraform-vpc-project/
+├── modules/
+│   ├── vpc/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── bastion/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── app-layer/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   └── networking/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+├── environments/
+│   ├── dev/
+│   │   ├── main.tf
+│   │   ├── variables.tfvars
+│   │   └── backend.tf
+│   └── prod/
+│       ├── main.tf
+│       ├── variables.tfvars
+│       └── backend.tf
+├── scripts/
+│   ├── userdata.sh
+│   └── metrics.sh
+├── README.md
+└── .gitignore
+```
 
-- VPC 1: `192.168.0.0/16`
-- VPC 2: `172.32.0.0/16`
+**Descrição:**
 
-## 2️⃣ Gateways
+- **modules/** – Módulos Terraform reutilizáveis para VPC, Bastion, camada de aplicação e networking  
+- **environments/** – Configurações específicas por ambiente (dev, prod)  
+- **scripts/** – Scripts de inicialização, UserData, métricas customizadas  
+- **README.md** – Documentação do projeto  
+- **.gitignore** – Ignorar arquivos sensíveis e estados locais do Terraform  
 
-- Internet Gateway para ambas as VPCs
-- NAT Gateway na subnet pública
-- Atualização das Route Tables para roteamento adequado
+---
 
-## 3️⃣ Transit Gateway
+# 🚀 Provisionamento da Infraestrutura com Terraform
 
-- Associação das duas VPCs
-- Comunicação privada entre camadas
+## 1️⃣ Inicializar Terraform
 
-## 4️⃣ Observabilidade
+```bash
+terraform init
+```
 
-- Criação de CloudWatch Log Groups
-- Dois Log Streams dedicados
-- Ativação de VPC Flow Logs para ambas as VPCs
+## 2️⃣ Validar e Planejar
+
+```bash
+terraform plan -var-file=variables.tfvars
+```
+
+## 3️⃣ Aplicar Infraestrutura
+
+```bash
+terraform apply -var-file=variables.tfvars --auto-approve
+```
+
+### Recursos Provisionados
+
+- Duas VPCs (Administrativa e de Aplicação)
+- Subnets públicas e privadas
+- Internet Gateway e NAT Gateway
+- Transit Gateway e associações
+- Security Groups e IAM Roles
+- Auto Scaling Group
+- Network Load Balancer
+- Route 53 CNAME configurado
+- CloudWatch Log Groups e VPC Flow Logs
 
 ---
 
 # 📦 Camada de Aplicação
 
 ## Launch Configuration
-
-- Golden AMI
+- Base: Golden AMI
 - Instance Type: `t2.micro`
 - UserData:
   - Pull do código do repositório
@@ -125,21 +180,18 @@ Essa abordagem reduz tempo de provisionamento e garante padronização das inst�
 - Security Group:
   - Porta 22 apenas do Bastion
   - Porta 80 pública
-- Key Pair
+- Key Pair configurada via Terraform
 
 ## Auto Scaling Group
-
 - Min: 2
 - Max: 4
 - Subnets privadas distribuídas em AZ 1a e 1b
 
 ## Load Balancer
-
 - Network Load Balancer público
 - Target Group associado ao ASG
 
 ## DNS
-
 - Registro CNAME configurado no Route 53
 - Domínio apontando para o NLB
 
@@ -192,16 +244,7 @@ Essa abordagem reduz tempo de provisionamento e garante padronização das inst�
 - Observabilidade de tráfego em nível de VPC
 - Boas práticas de segurança e IAM
 - Integração de DNS com Load Balancer
-
----
-
-# 🤝 Contribuição
-
-1. Fork do repositório  
-2. Criar branch  
-3. Commit  
-4. Push  
-5. Pull Request  
+- Provisionamento automatizado com Terraform
 
 ---
 
@@ -215,4 +258,4 @@ Considere:
 
 ---
 
-> Este projeto simula uma arquitetura corporativa real focada em escalabilidade, segurança e alta disponibilidade na AWS.
+> Este projeto simula uma arquitetura corporativa real focada em escalabilidade, segurança e alta disponibilidade na AWS, provisionada de forma automatizada com Terraform.
